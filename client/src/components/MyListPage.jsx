@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 function MyListPage() {
   const [caughtPokemonNames, setCaughtPokemonNames] = useState([]);
   const [caughtPokemonDetails, setCaughtPokemonDetails] = useState([]);
+  const [releasePokemon, setReleasePokemon] = useState(false);
 
   useEffect(() => {
     // Get the names of all caught Pokemon
@@ -14,7 +15,7 @@ function MyListPage() {
       const reversedNames = response.data.caughtPokemonNames.reverse();
       setCaughtPokemonNames(reversedNames);
     });
-  }, []);
+  }, [releasePokemon]);
 
   useEffect(() => {
     const promises = caughtPokemonNames.map((name) =>
@@ -25,6 +26,7 @@ function MyListPage() {
     });
   }, [caughtPokemonNames]);
 
+  //unfinished code
   const handleEditClick = (name) => {
     console.log(name);
     axios
@@ -34,6 +36,30 @@ function MyListPage() {
         setCaughtPokemonNames((prevNames) =>
           prevNames.map((n) => (n === name ? updatedName : n))
         );
+      });
+  };
+
+  const handleRelease = (name) => {
+    console.log(name);
+    axios
+      .post("http://localhost:9000/release-pokemon", {
+        pokemon: name,
+      })
+      .then((response) => {
+        console.log(response.data);
+        if (response.data.success) {
+          const success = window.confirm(response.data.message);
+          if (success) {
+            setReleasePokemon(!releasePokemon); // Toggle the state to re-fetch the list
+          }
+        } else {
+          const tryAgain = window.confirm(response.data.message);
+          if (tryAgain) {
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
       });
   };
   return (
@@ -51,8 +77,17 @@ function MyListPage() {
               <Card.Body>
                 <div className="text-center">
                   <Card.Title>{pokemon.name}</Card.Title>
-                  <Button onClick={() => handleEditClick(pokemon.name)}>
+                  <Button
+                    style={{ marginRight: "10px" }}
+                    onClick={() => handleEditClick(pokemon.name)}
+                  >
                     Edit Name
+                  </Button>
+                  <Button
+                    style={{ backgroundColor: "red" }}
+                    onClick={() => handleRelease(pokemon.name)}
+                  >
+                    Ralease
                   </Button>
                 </div>
               </Card.Body>

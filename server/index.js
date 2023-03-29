@@ -19,21 +19,20 @@ app.use(cors());
 /* OBJECT */
 const caughtPokemons = {};
 /* ROUTES */
+
+//catch-pokemon route
 app.post("/catch-pokemon", (req, res) => {
   const { pokemon } = req.body;
 
-  // Generate a random number between 0 and 1
   if (caughtPokemons[pokemon]) {
     res.json({
       success: false,
       message: `You have already caught ${pokemon}!`,
     });
   } else {
-    // Generate a random number between 0 and 1
     const probability = Math.random();
 
     if (probability >= 0.5) {
-      // Add the caught Pokemon name to the caughtPokemons object
       caughtPokemons[pokemon] = true;
       console.log(caughtPokemons);
       res.json({ success: true, message: `You caught ${pokemon}!` });
@@ -43,23 +42,51 @@ app.post("/catch-pokemon", (req, res) => {
   }
 });
 
+//get-caught-pokemons route
 app.get("/caught-pokemons", (req, res) => {
   const caughtPokemonNames = Object.keys(caughtPokemons);
   res.json({ caughtPokemonNames });
 });
 
-app.put("/caught-pokemon/:name", (req, res) => {
-  const { name } = req.params;
-  const { newName } = req.body;
-  console.log(name);
-  if (!caughtPokemons[name]) {
-    res
-      .status(404)
-      .json({ success: false, message: `Pokemon ${name} not found` });
+// app.put("/caught-pokemon/:name", (req, res) => {
+//   const { name } = req.params;
+//   const { newName } = req.body;
+//   console.log(name);
+//   if (!caughtPokemons[name]) {
+//     res
+//       .status(404)
+//       .json({ success: false, message: `Pokemon ${name} not found` });
+//   } else {
+//     caughtPokemons[newName] = true;
+//     delete caughtPokemons[name];
+//     res.json({ success: true, message: `Renamed ${name} to ${newName}` });
+//   }
+// });
+
+app.post("/release-pokemon", (req, res) => {
+  const { pokemon } = req.body;
+
+  const releaseNumber = Math.floor(Math.random() * 100);
+
+  let isPrime = true;
+  for (let i = 2; i < releaseNumber; i++) {
+    if (releaseNumber % i === 0) {
+      isPrime = false;
+      break;
+    }
+  }
+  if (isPrime) {
+    delete caughtPokemons[pokemon];
+    console.log(caughtPokemons);
+    res.json({
+      success: true,
+      message: `${pokemon} has been released. The release number ${releaseNumber} is prime.`,
+    });
   } else {
-    caughtPokemons[newName] = true;
-    delete caughtPokemons[name];
-    res.json({ success: true, message: `Renamed ${name} to ${newName}` });
+    res.json({
+      success: false,
+      message: `${pokemon} release has failed. The release number ${releaseNumber} is not prime.`,
+    });
   }
 });
 
